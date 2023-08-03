@@ -1,0 +1,11 @@
+# Temp files
+*.*~
+*.bak
+*.pid
+*.log
+*.lock
+
+
+
+# Files that we don't want to ignore
+!.gitignore
