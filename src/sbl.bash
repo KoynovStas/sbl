@@ -290,3 +290,18 @@ sbl_log() {
 
     [ $cur_lvl -eq $SBL_LOG_LVL_FTL ] && exit 1
 }
+
+
+
+sbl_request_reboot() {
+
+    while true ; do
+        read -r -n 1 -p "Reboot system now? [y|n]: "
+
+        case $REPLY in
+            y|Y) reboot ;;
+            n|N) return ;;
+            *)   printf "\nInvalid input. Please press 'y' or 'n'\n" ;;
+        esac
+    done
+}
