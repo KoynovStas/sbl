@@ -90,8 +90,8 @@ sbl_get_src_name() { basename "$(readlink -f "${1:-${BASH_SOURCE[1]}}")" ; }
 # sbl_run_cmd_as_user some_cmd '"param11 param12" "param21"'
 # sbl_run_cmd_as_user some_cmd "\"param11 param12\" \"param21\""
 #
-sbl_run_cmd_as_user() { sudo -u "$SBL_USER" bash -c "$*" ; }
-sbl_run_cmd_as_root() { sudo bash -c "$*" ; }
+sbl_run_cmd_as_user() { local cmd=$1; shift; sudo -u "$SBL_USER" bash -c '$0 "$@"' "$cmd" "$@" ; }
+sbl_run_cmd_as_root() { local cmd=$1; shift; sudo                bash -c '$0 "$@"' "$cmd" "$@" ; }
 
 
 
@@ -105,8 +105,8 @@ sbl_run_cmd_as_root() { sudo bash -c "$*" ; }
 # sbl_run_fun_as_user some_function '"param11 param12" "param21"'
 # sbl_run_fun_as_user some_function "\"param11 param12\" \"param21\""
 #
-sbl_run_fun_as_user() { sbl_run_cmd_as_user "$(declare -f "$1"); $*" ; }
-sbl_run_fun_as_root() { sbl_run_cmd_as_root "$(declare -f "$1"); $*" ; }
+sbl_run_fun_as_user() { sudo -u "$SBL_USER" bash -c "$(declare -f "$1"); $*" ; }
+sbl_run_fun_as_root() { sudo                bash -c "$(declare -f "$1"); $*" ; }
 
 
 
@@ -122,19 +122,14 @@ sbl_run_fun_as_root() { sbl_run_cmd_as_root "$(declare -f "$1"); $*" ; }
 # |xxx:# sudo ./t.sh|    root  |  root |   xxx    |  /root  |/home/xxx
 #
 SBL_USER=$(logname)
-readonly SBL_USER
-
-
-# Single quotes because we don't want $HOME expansion
-# shellcheck disable=SC2016
-SBL_HOME=$(sbl_run_cmd_as_user 'echo -n $HOME')
-readonly SBL_HOME
+SBL_HOME=$(sudo -u "$SBL_USER" bash -c 'echo -n $HOME')
+readonly SBL_USER SBL_HOME
 
 
 
 sbl_rerun_as_root() {
     if sbl_is_user ; then
-        sbl_run_cmd_as_root "$(sbl_get_src_full_name "${BASH_SOURCE[1]}") $*"
+        sbl_run_cmd_as_root "$(sbl_get_src_full_name "${BASH_SOURCE[1]}")" "$@"
     fi
 }
 
@@ -142,7 +137,7 @@ sbl_rerun_as_root() {
 
 sbl_rerun_as_user() {
     if sbl_is_root ; then
-        sbl_run_cmd_as_user "$(sbl_get_src_full_name "${BASH_SOURCE[1]}") $*"
+        sbl_run_cmd_as_user "$(sbl_get_src_full_name "${BASH_SOURCE[1]}")" "$@"
     fi
 }
 

@@ -12,6 +12,19 @@
 
 
 
+param_info() {
+    [ $# -eq 0 ] && return
+
+    echo count params: $#
+    for p in "$@" ; do
+        echo "${p}"
+    done
+}
+
+param_info "$@"
+
+
+
 if sbl_is_root ; then
         echo "I am root it's ok (rerun is not needed)"
     else
@@ -20,4 +33,4 @@ if sbl_is_root ; then
 fi
 
 
-sbl_rerun_as_root
+sbl_rerun_as_root "$@"
